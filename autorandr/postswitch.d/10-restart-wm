@@ -1,0 +1,4 @@
+#!/bin/bash
+
+bspc wm -r
+notify-send "WM Restarted (by autorandr)"
