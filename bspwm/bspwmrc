@@ -1,12 +1,31 @@
 #! /bin/sh
-/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 
-pgrep -x sxhkd > /dev/null || sxhkd &	
 
-if (xrandr -q | grep -E '\bDP-1 connected') then
+#---------------------------------
+#BSPWM launch script by Lisoveliy for Linux Mint and laptop configuration
+#00:46 14.10.2024
+#---------------------------------
+
+#Configuration constants
+EXTERNAL_MONITOR_NAME = 'DP-1' #name of display from xrandr
+CHANGE_LANG_KEYMAP = 'grp:win_space_toggle' #keymap group for change language in setxkbmap
+WALLPAPER_LOCATION = '~/Изображения/wallpaper.jpg' #wallpaper location
+
+##Start required services##
+
+pgrep -x sxhkd > /dev/null || sxhkd & #start sxhkd
+/usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 #start auth agent
+
+#Setup BSPWM
+
+#Setup workspaces for monitors
+
+#FOR DUAL MONITOR DOCK MODE
+if (xrandr -q | grep -E "\b$EXTERNAL_MONITOR_NAME connected") then
     autorandr --change
     bspc wm -O eDP-1 DP-1
     bspc monitor eDP-1 -d 1 2 3 4
     bspc monitor DP-1 -d 5 6 7 8
+#FOR SINGLE MONITOR MOBILE MODE
 else
     autorandr --change
     bspc monitor eDP-1 -d 1 2 3 4 5 6 7 8
@@ -14,18 +33,13 @@ fi
 
 bspc monitor "$m" -o $*
 
+#Setup BSPWM settings
 bspc config border_width         5
 bspc config window_gap          5
 
 bspc config split_ratio          0.52
 bspc config borderless_monocle   true
 bspc config gapless_monocle      true
-
-bspc rule -a Gimp desktop='^8' state=floating follow=on
-bspc rule -a Chromium desktop='^2'
-bspc rule -a mplayer2 state=floating
-bspc rule -a Kupfer.py focus=on
-bspc rule -a Screenkey manage=off
 
 bspc config normal_border_color "#0A1F32"
 bspc config active_border_color "#F0C674"
@@ -38,15 +52,16 @@ bspc config pointer_modifier    super
 
 bspc config split_ratio          0.52
 
-##BG##
-feh --bg-fill ~/Изображения/wallpaper.jpg &
+##Start post-initial services##
 
-##NOTIFICATIONS##
+#Setup background
+feh --bg-fill $WALLPAPER_LOCATION &
+
+#Setup notifications
 dunst &
 
-##POLYBAR##
-sleep 5
+#Setup polybar
 ~/.config/polybar/launch-poly.sh &
 
-##KEYMAP##
-setxkbmap -option grp:win_space_toggle ru,us & 
+#Setup keymap
+setxkbmap -option $CHANGE_LANG_KEYMAP ru,us & 
